@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">MobiPC Connect</string>
+    <string name="a11y_label">MobiPC Remote Control</string>
+    <string name="a11y_desc">Lets an approved device tap, scroll and type on this phone while you are hosting. Used only during an approved session.</string>
+</resources>

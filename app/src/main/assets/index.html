@@ -1,0 +1,1485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b1220">
+<title>MobiPC Connect — Your devices, one dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b1220;--bg2:#0f1a2e;--card:#121e33;--card2:#0d1729;--line:#223149;--line2:#2f4262;--text:#eef3fb;--muted:#93a3bd;--accent:#3ee0cf;--accent-ink:#04201d;--blue:#7b93ff;--ok:#5fdca0;--bad:#ff7b8c;--r:16px;--font:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;min-height:100vh;background:radial-gradient(900px 480px at 8% -10%,#16385a 0,transparent 60%),radial-gradient(700px 420px at 100% 30%,#1c2150 0,transparent 55%),var(--bg);color:var(--text);font:15px/1.55 var(--font);padding-top:env(safe-area-inset-top,0);padding-bottom:env(safe-area-inset-bottom,0)}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer;border:1px solid transparent;border-radius:12px;padding:12px 18px;font-weight:700;background:var(--accent);color:var(--accent-ink);transition:transform .15s,filter .15s,background .15s,border-color .15s}
+button:hover:not(:disabled){filter:brightness(1.08)}
+button:active:not(:disabled){transform:scale(.98)}
+button:disabled{opacity:.45;cursor:not-allowed}
+button.secondary{background:#ffffff0a;color:var(--text);border-color:var(--line2)}
+button.secondary:hover:not(:disabled){background:#ffffff14}
+button.danger{background:#ff7b8c1c;color:var(--bad);border-color:#ff7b8c55}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+input{width:100%;padding:13px 14px;border-radius:12px;border:1px solid var(--line2);background:var(--card2);outline:none;transition:border-color .15s,box-shadow .15s}
+input::placeholder{color:#6c7d99}
+input:focus{border-color:var(--accent);box-shadow:0 0 0 3px #3ee0cf22}
+.hidden{display:none!important}
+.wrap{max-width:1120px;margin:0 auto;padding:20px}
+
+/* top bar */
+.nav{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 16px;background:#0e1829cc;border:1px solid var(--line);border-radius:18px;backdrop-filter:blur(14px);position:sticky;top:12px;z-index:5}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:19px;letter-spacing:-.3px}
+.logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--blue));display:grid;place-items:center;color:#06231f}
+.logo svg{width:19px;height:19px}
+.brand i{font-style:normal;color:var(--accent)}
+.secure{font-size:12px;color:var(--ok);font-weight:600;display:flex;align-items:center;gap:7px}
+.secure:before{content:"";width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 4px #5fdca022}
+
+/* sign in */
+.auth{max-width:440px;margin:7vh auto 0;padding:28px;background:linear-gradient(160deg,var(--card),var(--bg2));border:1px solid var(--line);border-radius:22px;box-shadow:0 24px 70px #0007}
+.auth h3{margin:0 0 4px;font-size:24px;letter-spacing:-.5px}
+.auth .lead{margin:0 0 18px;color:var(--muted);font-size:14px}
+.authgrid{display:grid;gap:10px}
+.authbuttons{display:flex;gap:10px;margin-top:14px}
+.authbuttons button{flex:1}
+.status{font-size:13px;color:var(--muted);margin-top:12px;overflow-wrap:anywhere}
+/* signed-in: collapse the auth card into a slim account bar */
+.auth:has(#authGrid.hidden){max-width:none;margin:14px 0 0;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-radius:14px;box-shadow:none}
+.auth:has(#authGrid.hidden) h3,.auth:has(#authGrid.hidden) .lead{display:none}
+.auth:has(#authGrid.hidden) .status{margin:0;color:var(--ok)}
+.auth:has(#authGrid.hidden) .authbuttons{margin:0}
+body:has(#authGrid:not(.hidden)) .dash{display:none}
+body:has(#authGrid.hidden) .welcome{display:none}
+.welcome{max-width:440px;margin:22px auto 0;text-align:center;color:var(--muted);font-size:13px}
+
+/* dashboard */
+.dash{margin-top:18px;display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:18px;align-items:start}
+.card{background:linear-gradient(160deg,var(--card),var(--bg2));border:1px solid var(--line);border-radius:20px;padding:22px}
+.card h2{margin:0;font-size:18px;letter-spacing:-.2px}
+.card h2 small{display:block;font-size:13px;font-weight:500;color:var(--muted);margin-top:3px;letter-spacing:0}
+.me-icon{width:52px;height:52px;border-radius:15px;background:#3ee0cf14;border:1px solid #3ee0cf44;display:grid;place-items:center;margin-bottom:14px;font-size:26px}
+.btnstack{display:grid;gap:10px;margin-top:16px}
+.badge{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--bad);color:#2a0710;font-size:12px;font-weight:800;margin-left:6px}
+.steps{list-style:none;margin:22px 0 0;padding:18px 0 0;border-top:1px solid var(--line);display:grid;gap:14px;counter-reset:s}
+.steps li{display:flex;gap:12px;align-items:flex-start;color:var(--muted);font-size:13.5px;counter-increment:s}
+.steps li:before{content:counter(s);flex:none;width:24px;height:24px;border-radius:50%;border:1px solid var(--line2);display:grid;place-items:center;font-size:12px;font-weight:700;color:var(--accent)}
+.steps b{color:var(--text);font-weight:600}
+.note{font-size:12px;color:var(--muted);margin-top:16px;line-height:1.5}
+.head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.head button{padding:9px 14px;font-size:13px}
+.saved-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin-top:16px}
+.saved-card{background:var(--card2);border:1px solid var(--line);border-radius:16px;padding:16px;min-width:0;transition:border-color .15s}
+.saved-card:hover{border-color:var(--line2)}
+.saved-card h4{margin:0 0 6px;font-size:15px;overflow-wrap:anywhere}
+.saved-meta{color:var(--muted);font-size:12.5px}
+.online-dot,.offline-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+.online-dot{background:var(--ok);box-shadow:0 0 0 3px #5fdca022}
+.offline-dot{background:#6f7e96}
+.saved-actions{display:flex;gap:8px;margin-top:14px}
+.saved-actions button{flex:1;padding:9px 8px;font-size:12.5px}
+.request-empty{padding:16px;border:1px dashed var(--line2);border-radius:14px;color:var(--muted);font-size:13px;grid-column:1/-1}
+
+/* dialogs */
+.overlay{display:none;position:fixed;inset:0;z-index:20;background:#040810d9;backdrop-filter:blur(10px);padding:14px;align-items:center;justify-content:center}
+.overlay.open{display:flex}
+.dialog{width:min(100%,560px);max-height:92vh;overflow:auto;background:var(--card);border:1px solid var(--line2);border-radius:22px;padding:22px;box-shadow:0 30px 90px #000a}
+.dialoghead{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.dialoghead h2{margin:0;font-size:20px}
+.close{background:#ffffff0f;color:var(--text);padding:8px 13px;border-color:var(--line2)}
+.tabs{display:flex;gap:4px;margin:16px 0;padding:4px;background:var(--card2);border:1px solid var(--line);border-radius:14px}
+.tabs button{flex:1;background:transparent;color:var(--muted);padding:10px;border-radius:10px}
+.tabs button.active{background:var(--line2);color:var(--text)}
+.panel{background:var(--card2);border:1px solid var(--line);border-radius:16px;padding:18px}
+.panel h3{margin:0 0 4px;font-size:16px}
+.label{display:block;color:var(--muted);font-size:12.5px;font-weight:600;margin:14px 0 6px}
+.full{width:100%;margin-top:12px}
+.qr-area{display:flex;gap:16px;align-items:center;margin-top:16px;padding:14px;background:#3ee0cf0d;border:1px solid #3ee0cf40;border-radius:16px}
+.qrbox{width:122px;height:122px;flex:none;background:#fff;border-radius:12px;display:grid;place-items:center;padding:6px}
+.qrbox img,.qrbox canvas{max-width:100%;max-height:100%}
+.code{font-size:26px;letter-spacing:3px;color:var(--ok);font-weight:800;overflow-wrap:anywhere}
+.message{display:none;padding:12px 14px;margin-top:14px;border-radius:12px;background:#5fdca014;color:#bdf3d6;border:1px solid #5fdca040;font-size:13px;overflow-wrap:anywhere}
+.message.show{display:block}
+.panel-incoming{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+.panel-incoming h4{margin:0 0 4px;font-size:15px}
+.request-card{margin-top:10px;padding:14px;border:1px solid var(--line2);border-radius:14px;background:var(--card)}
+.request-actions{display:flex;gap:8px;margin-top:12px}
+.request-actions button{flex:1}
+.scanner{display:none;margin-top:12px}
+.scanner.show{display:block}
+#reader{width:100%;color:#fff}
+#reader video{border-radius:12px}
+.stage{background:#050a14;border:1px solid var(--line);border-radius:16px;min-height:240px;display:grid;place-items:center;margin-top:14px;overflow:hidden}
+.stage video{width:100%;max-height:62vh;object-fit:contain}
+.stage .ph{padding:28px;text-align:center}
+.chips{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.chip{padding:12px;border:1px solid var(--line);border-radius:14px;text-align:center;font-size:12.5px;color:var(--muted)}
+.chip b{display:block;color:var(--text);font-size:13px;margin-bottom:2px}
+
+.sharebar{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:40;display:flex;align-items:center;gap:12px;padding:10px 12px 10px 16px;background:#2a0f17;border:1px solid #ff7b8c88;border-radius:16px;box-shadow:0 14px 50px #000a;max-width:calc(100% - 24px)}
+.sharebar span{font-weight:700;font-size:13.5px}
+.sharebar .rec{width:9px;height:9px;flex:none;border-radius:50%;background:var(--bad);animation:pulse 1.4s infinite}
+.sharebar button{padding:8px 12px;font-size:13px;white-space:nowrap}
+@keyframes pulse{50%{opacity:.25}}
+.sharebar{flex-wrap:wrap;justify-content:center}
+#remoteViewerVideo{touch-action:none;outline:none}
+.vctools{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.vctools button{padding:10px 6px;font-size:12.5px}
+#vcKb{position:fixed;left:0;bottom:0;width:1px;height:1px;opacity:0;pointer-events:none}
+.host{margin-top:18px;padding:16px;border:1px solid var(--line2);border-radius:16px;background:var(--card2)}
+.host-top{display:flex;gap:12px;align-items:flex-start}
+.host-dot{width:12px;height:12px;border-radius:50%;background:#6f7e96;margin-top:5px;flex:none}
+.host-dot.ready{background:var(--accent);box-shadow:0 0 0 4px #3ee0cf22}
+.host-dot.live{background:var(--ok);box-shadow:0 0 0 4px #5fdca033;animation:pulse 1.4s infinite}
+.check{display:flex;gap:10px;align-items:center;margin-top:14px;font-size:13px;color:var(--muted);cursor:pointer}
+.check input{width:18px;height:18px;padding:0;accent-color:var(--accent)}
+.saved-card.is-live{border-color:var(--ok);background:linear-gradient(160deg,#5fdca014,var(--card2))}
+.livetxt{color:var(--ok)}
+.overlay.rv{padding:0;background:#050a14;backdrop-filter:none;align-items:stretch}
+.rv-box{width:100%;height:100%;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.rv-head{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--card);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.rv-title{flex:1;min-width:150px;display:flex;flex-direction:column}
+.rv-chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip2{font-size:11.5px;color:var(--muted);border:1px solid var(--line2);border-radius:999px;padding:4px 10px}
+.chip2 span{color:var(--text);font-weight:700}
+.rv-head button{padding:8px 12px;font-size:13px}
+.rv-stage{flex:1;min-height:0;position:relative;background:#000}
+.rv-stage video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.rv-stage .ph{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;pointer-events:none}
+#vcDot{position:fixed;width:28px;height:28px;margin:-14px 0 0 -14px;border-radius:50%;border:2px solid var(--accent);background:#3ee0cf44;pointer-events:none;opacity:0;transition:opacity .25s;z-index:60}
+.rv .vctools{margin:0;padding:10px 12px;background:var(--card);border-top:1px solid var(--line);grid-template-columns:repeat(5,1fr)}
+.rv .vctools{display:flex;overflow-x:auto;gap:8px;-webkit-overflow-scrolling:touch}
+.rv .vctools button{flex:0 0 auto;min-width:92px;padding:12px 14px;font-size:13px}
+@media(max-height:480px){.rv-head{padding:6px 10px}.rv-title .saved-meta{display:none}.rv .vctools{padding:6px 10px}.rv .vctools button{padding:8px 12px}}
+@media(max-width:860px){.dash{grid-template-columns:1fr}}
+@media(max-width:560px){.wrap{padding:12px}.nav{position:static}.secure{display:none}.auth{margin-top:4vh;padding:22px}.qr-area{flex-direction:column;align-items:flex-start}.chips{grid-template-columns:1fr}.dialog{padding:16px}.saved-list{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="nav">
+ <div class="brand"><span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="14" height="10" rx="2"/><path d="M6 18h6M9 14v4"/><rect x="15" y="9" width="7" height="12" rx="2"/></svg></span>MobiPC <i>Connect</i></div>
+ <div class="secure">Private device pairing</div>
+</header>
+
+<section class="auth">
+ <h3 id="authTitle">Account Login</h3>
+ <p class="lead">Sign in to register your phone and PC and pair them securely.</p>
+ <div class="authgrid" id="authGrid">
+  <input id="email" type="email" placeholder="Email address" autocomplete="email">
+  <input id="password" type="password" placeholder="Password (at least 6 characters)" autocomplete="current-password">
+ </div>
+ <div class="authbuttons">
+  <button id="signin">Sign in</button>
+  <button id="signup" class="secondary">Create account</button>
+  <button id="signout" class="secondary hidden">Sign out</button>
+ </div>
+ <div class="status" id="authStatus">Checking account…</div>
+</section>
+<p class="welcome">Nothing is shared without the device owner's approval. You can stop a session any time.</p>
+
+<section id="incoming" class="hidden"></section>
+
+<div class="dash">
+ <main>
+  <section class="card">
+   <div class="me-icon">🖥️</div>
+   <h2>This device<small id="detectedDeviceText">Detecting your device…</small></h2>
+   <div class="btnstack">
+    <button id="openThisDevice">Set up this device</button>
+    <button id="openConnect" class="secondary">Connect with a code</button>
+    <button id="openRequests" class="secondary">Pending requests<span id="reqBadge" class="badge hidden">0</span></button>
+   </div>
+   <div class="host" id="hostPanel">
+    <div class="host-top"><span class="host-dot" id="hostDot"></span><div><b id="hostTitle">Not hosting</b><div class="saved-meta" id="hostSub"></div></div></div>
+    <label class="check"><input type="checkbox" id="hostCtl"><span id="hostCtlText">Allow remote control (needs the MobiPC Agent)</span></label>
+    <div class="saved-meta hidden" id="hostA11y" style="margin-top:12px">Remote control needs the MobiPC Accessibility service.<button class="secondary full" id="hostA11yBtn">Turn on in Settings</button></div>
+    <button class="full" id="hostStart">Start hosting this screen</button>
+    <button class="secondary full hidden" id="hostStop">Stop hosting</button>
+   </div>
+   <ol class="steps">
+    <li><span><b>Register this device.</b> You get an 8-character code and a QR code.</span></li>
+    <li><span><b>Enter the other device's code</b> or scan its QR code.</span></li>
+    <li><span><b>Approve once.</b> After that, trusted devices connect instantly with one tap.</span></li>
+   </ol>
+   <p class="note">The website handles pairing while it is open. Always-on background access and live control need the native Windows and Android apps.</p>
+  </section>
+ </main>
+
+ <section class="card" id="savedWrap">
+  <div class="head">
+   <h2>My connected devices<small>Only your other, approved devices appear here.</small></h2>
+   <button class="secondary" id="refreshPairedDevices">↻ Refresh</button>
+  </div>
+  <div id="pairedDevices" class="saved-list"><div class="request-empty">Sign in to see connected devices.</div></div>
+  <div id="savedMsg" class="status"></div>
+ </section>
+</div>
+</div>
+
+<div class="overlay" id="overlay">
+ <div class="dialog">
+  <div class="dialoghead">
+   <h2 id="dialogTitle">Device setup</h2>
+   <button class="close" id="close" aria-label="Close">✕</button>
+  </div>
+  <p class="status" id="dialogSub"></p>
+
+  <div class="tabs">
+   <button id="registerTab" class="active">Register device</button>
+   <button id="connectTab">Connect device</button>
+  </div>
+
+  <section id="registerPanel" class="panel">
+   <h3>Register this device</h3>
+   <label class="label" for="deviceName">Device name</label>
+   <input id="deviceName" maxlength="32" placeholder="My Windows PC">
+   <button class="full" id="createCode">Save this device</button>
+   <button class="secondary full hidden" id="regenerateCode">↻ Generate a new code</button>
+
+   <div id="qrResult" class="qr-area hidden">
+    <div class="qrbox" id="qrcode"></div>
+    <div>
+     <div class="saved-meta">Your device code</div>
+     <div class="code" id="codeText">----</div>
+     <button class="secondary full" id="copyCode">Copy code</button>
+    </div>
+   </div>
+   <div class="message" id="registerMsg"></div>
+   <section class="panel-incoming" id="panelIncoming">
+    <h4>Incoming requests</h4>
+    <div class="saved-meta">Requests for this device show up here while this page is open.</div>
+    <div id="panelIncomingList" style="margin-top:10px"><div class="request-empty">No requests yet.</div></div>
+   </section>
+  </section>
+
+  <section id="connectPanel" class="panel hidden">
+   <h3>Connect to another device</h3>
+   <label class="label" for="manualCode">Device code</label>
+   <input id="manualCode" maxlength="9" placeholder="ABCD-1234" autocomplete="off" autocapitalize="characters">
+   <button class="full" id="sendRequest">Send connection request</button>
+   <button class="secondary full" id="scanButton">▦ Scan QR code</button>
+   <div class="scanner" id="scanner">
+    <div id="reader"></div>
+    <button class="secondary full" id="stopScan">Stop scanner</button>
+   </div>
+   <div class="message" id="connectMsg"></div>
+   <p class="note">After the owner approves and allows screen sharing, their live screen opens here. Control also needs the owner's OK and the MobiPC Agent.</p>
+  </section>
+
+  <p class="note">Only approve requests from devices you recognize. Never share your device code publicly.</p>
+  <button class="secondary full" id="back">Back</button>
+ </div>
+</div>
+
+<div class="overlay" id="screenOverlay" aria-hidden="true">
+ <div class="dialog" style="width:min(100%,880px)">
+  <div class="dialoghead"><h2>Check screen</h2><button class="close" id="screenClose" aria-label="Close">✕</button></div>
+  <p class="status" id="screenStatus">Screen sharing is off. Start only when you are ready.</p>
+  <div class="stage">
+   <video id="screenPreview" autoplay playsinline muted></video>
+   <div id="screenPlaceholder" class="ph status">Your screen preview appears here after you grant permission.</div>
+  </div>
+  <button id="startScreenShare" class="full">Allow and start screen share</button>
+  <button id="stopScreenShare" class="secondary full" disabled>Stop screen sharing</button>
+  <p class="note">This preview is local only. It does not stream to the paired device yet.</p>
+ </div>
+</div>
+
+<div class="overlay rv" id="remoteViewerOverlay" aria-hidden="true">
+ <div class="rv-box">
+  <div class="rv-head">
+   <div class="rv-title"><b id="rvName">Remote screen</b><span class="saved-meta" id="remoteViewerStatus">Connecting…</span></div>
+   <div class="rv-chips"><span class="chip2">Screen <span id="remoteScreenState">Connecting…</span></span><span class="chip2">Control <span id="vcState">Off</span></span></div>
+   <button class="secondary" id="remoteFullscreen" title="Full screen">⛶</button>
+   <button class="secondary" id="remoteViewerClose" title="Hide, keep the session running">Hide</button>
+   <button class="danger" id="remoteViewerDone">End session</button>
+  </div>
+  <div class="rv-stage">
+   <video id="remoteViewerVideo" autoplay playsinline muted tabindex="0"></video>
+   <div id="remoteViewerPlaceholder" class="ph"><div><div style="font-size:40px">🔗</div><b>Connected</b><p class="status">Waiting for the other device to share its screen…<br>Tip: rotate your phone for a bigger view.</p></div></div>
+   <i id="vcDot"></i>
+  </div>
+  <div class="vctools hidden" id="vcTools">
+   <button class="secondary" id="vcKeyboard">⌨ Keyboard</button>
+   <button class="secondary" id="vcMode">Mode: Direct</button>
+   <button class="secondary" id="vcRight">Right-click: off</button>
+   <button class="secondary" id="vcDrag">Drag mode: off</button>
+   <button class="secondary" id="vcEsc">Esc</button>
+   <button class="secondary" id="vcTab">Tab</button>
+   <button class="secondary" id="vcAlt">Alt+Tab</button>
+   <button class="secondary" id="vcWin">Win</button>
+  </div>
+  <input id="vcKb" type="password" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Remote keyboard input">
+ </div>
+</div>
+
+<div class="sharebar hidden" id="shareBar" role="status"><i class="rec"></i><span id="shareBarText">Hosting your screen</span><button class="secondary" id="shareCtl">Allow control</button><button class="secondary hidden" id="shareEnd">End session</button><button class="danger" id="shareBarStop">Stop hosting</button></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+<script>
+(() => {
+'use strict';
+
+/* SUPABASE PROJECT SETTINGS */
+const SUPABASE_URL = 'https://gegjyispaemvrhfutwvq.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_DlaBLeMylfFdYOzEmIXlzQ_JAKizG2h';
+
+const $ = id => document.getElementById(id);
+
+let sb = null;
+let session = null;
+let currentDevice = /Android/i.test(navigator.userAgent) ? 'android' : 'pc';
+let currentCode = '';
+let scanner = null;
+let channel = null;
+let statusChannel = null;
+let heartbeatTimer = null;
+let registeredDevice = null;
+let savedDevicesCache = [];
+let currentOutgoingRequestId = null;
+let lastTargetId = null, lastPaired = [], reqInfo = {};
+const live = {}, announced = new Set();
+const APP = window.MobiBridge || null;
+const nat = {hosting:false, control:false, a11y:false, peerId:'', peerName:'', note:''};
+function pushSession(s) { if (APP && s) { try { APP.saveSession(SUPABASE_URL, SUPABASE_KEY, s.access_token, s.refresh_token); } catch (e) {} } }
+let incomingPollTimer = null;
+let outgoingPollTimer = null;
+let deviceRefreshTimer = null;
+
+const overlay = $('overlay');
+
+function showMessage(id, text) {
+ const el = $(id);
+ el.textContent = text;
+ el.classList.add('show');
+}
+
+function setStatus(text) {
+ $('authStatus').textContent = text;
+}
+
+function requireLogin() {
+ if (!session?.user) {
+  showMessage('registerMsg','Please sign in first.');
+  return false;
+ }
+ return true;
+}
+
+function localDeviceKey(type) {
+ return 'mobipc_device_' + session.user.id + '_' + type;
+}
+
+function normalizeCode(value) {
+ return String(value || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8);
+}
+
+function formatCode(value) {
+ const clean = normalizeCode(value);
+ return clean.length > 4 ? clean.slice(0,4) + '-' + clean.slice(4) : clean;
+}
+
+function showDeviceCode(device) {
+ registeredDevice = device;
+ currentCode = normalizeCode(device.device_code);
+ $('codeText').textContent = formatCode(currentCode);
+ $('qrcode').innerHTML = '';
+ if (window.QRCode) new QRCode($('qrcode'), {
+  text:'MOBIPC-PAIR:' + currentCode,
+  width:110, height:110, correctLevel:QRCode.CorrectLevel.M
+ });
+ $('qrResult').classList.remove('hidden');
+ $('regenerateCode').classList.remove('hidden');
+ $('createCode').textContent = 'Device saved';
+}
+
+async function loadSavedDevices() {
+ await loadPairedDevices();
+}
+
+async function loadPairedDevices() {
+ if (!sb || !session?.user) return;
+ const host = $('pairedDevices');
+ if (!host) return;
+ const {data,error} = await sb.rpc('get_paired_devices');
+ if (error) {
+  host.innerHTML = '<div class="request-empty">Could not load connected devices: ' + escapeHTML(error.message) + '</div>';
+  return;
+ }
+ const mine = ['pc','android'].map(t => localStorage.getItem(localDeviceKey(t))).filter(Boolean);
+ lastPaired = (data || []).filter(d => !mine.includes(String(d.peer_device_id)));
+ renderPaired();
+}
+function renderPaired() {
+ const host = $('pairedDevices');
+ if (!host) return;
+ if (!lastPaired.length) {
+  host.innerHTML = '<div class="request-empty">No paired devices yet. Open Connect, enter the code of the other device, then accept the request on that device.</div>';
+  return;
+ }
+ host.innerHTML = lastPaired.map(d => {
+  const seen = d.peer_last_seen_at;
+  const online = seen && (Date.now() - new Date(seen).getTime() < 90000);
+  const type = String(d.peer_device_type || '').toLowerCase();
+  const code = d.peer_device_code || '';
+  const peerId = String(d.peer_device_id || '');
+  const lv = live[peerId];
+  const status = lv ? '<span class="online-dot"></span><b class="livetxt">Connected · live</b>'
+   : online ? '<span class="online-dot"></span>Online' : '<span class="offline-dot"></span>Offline';
+  const main = lv
+   ? (lv.role === 'viewer' ? '<button data-view>View screen</button>' : '') + '<button class="secondary" data-end>End session</button>'
+   : '<button data-connect-code="' + escapeHTML(code) + '" ' + ((!online || !code) ? 'disabled' : '') + '>Connect</button>';
+  return '<article class="saved-card' + (lv ? ' is-live' : '') + '">' +
+   '<h4>' + (type === 'pc' ? '💻' : '📱') + ' ' + escapeHTML(d.peer_device_name || 'Connected device') + '</h4>' +
+   '<div class="saved-meta">' + (type === 'pc' ? 'Windows PC' : 'Android device') + ' · ' + status + '</div>' +
+   '<div class="saved-actions">' + main + '<button class="danger" data-disconnect-peer="' + escapeHTML(peerId) + '" ' + (!peerId ? 'disabled' : '') + '>Remove</button></div>' +
+   (!code && !lv ? '<div class="saved-meta">This device has no code, so it cannot be connected from here.</div>' : '') +
+  '</article>';
+ }).join('');
+ host.querySelectorAll('[data-connect-code]').forEach(btn => btn.onclick = async () => {
+  if (btn.disabled) return;
+  btn.disabled = true; btn.textContent = 'Connecting…';
+  await requestConnection(btn.getAttribute('data-connect-code'), 'savedMsg');
+ });
+ host.querySelectorAll('[data-view]').forEach(b => b.onclick = showRemoteViewer);
+ host.querySelectorAll('[data-end]').forEach(b => b.onclick = endSession);
+ host.querySelectorAll('[data-disconnect-peer]').forEach(btn => btn.onclick = async () => {
+  if (btn.disabled || !confirm('Remove this pairing? You will need to enter the device code again and approve once more.')) return;
+  btn.disabled = true; btn.textContent = 'Removing…';
+  const {error: removeError} = await sb.rpc('remove_paired_device', {p_peer_device_id: btn.getAttribute('data-disconnect-peer')});
+  if (removeError) {
+   $('savedMsg').textContent = 'Could not remove: ' + removeError.message;
+   btn.disabled = false; btn.textContent = 'Remove';
+   return;
+  }
+  $('savedMsg').textContent = 'Pairing removed.';
+  await loadPairedDevices();
+ });
+}
+
+async function startHeartbeat() {
+ if (!session?.user || !sb) return;
+ if (heartbeatTimer) clearInterval(heartbeatTimer);
+ const ids = ['pc','android'].map(t => localStorage.getItem(localDeviceKey(t))).filter(Boolean);
+ if (!ids.length) return;
+ const beat = async () => {
+  if (!session?.user) return;
+  for (const id of ids) {
+   await sb.from('devices').update({last_seen_at:new Date().toISOString()})
+    .eq('id',id).eq('user_id',session.user.id);
+  }
+  await loadSavedDevices();
+ };
+ await beat();
+ heartbeatTimer = setInterval(beat,30000);
+}
+
+function generateCode() {
+ const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+ const bytes = new Uint8Array(8);
+ crypto.getRandomValues(bytes);
+ let s = '';
+ for (let i=0;i<8;i++) s += chars[bytes[i] % chars.length];
+ return s; // Database stores the normalized 8-character code without a hyphen.
+}
+
+function openDevice(type) {
+ currentDevice = type;
+ $('dialogTitle').textContent = type === 'pc' ? 'PC Setup' : 'Android Setup';
+ $('dialogSub').textContent = type === 'pc'
+  ? 'Register this Windows computer or connect to your phone.'
+  : 'Register this Android phone or connect to your PC.';
+ $('deviceName').value = type === 'pc' ? 'MY WINDOWS PC' : 'MY ANDROID PHONE';
+ $('qrResult').classList.add('hidden');
+ $('regenerateCode').classList.add('hidden');
+ $('createCode').textContent = 'Save this device';
+ registeredDevice = null;
+ overlay.classList.add('open');
+ if (session?.user) { loadLocalRegisteredDevice(type); refreshIncomingRequests(); }
+ switchTab('register');
+}
+
+async function loadLocalRegisteredDevice(type) {
+ const id = localStorage.getItem(localDeviceKey(type));
+ if (!id || !sb || !session?.user) return;
+ const {data,error} = await sb.from('devices').select('id,device_code,device_name,device_type')
+  .eq('id',id).eq('user_id',session.user.id).maybeSingle();
+ if (!error && data) {
+  $('deviceName').value = data.device_name;
+  showDeviceCode(data);
+ }
+}
+
+function closeDialog() {
+ stopScanner();
+ overlay.classList.remove('open');
+}
+
+function switchTab(tab) {
+ const isRegister = tab === 'register';
+ $('registerPanel').classList.toggle('hidden',!isRegister);
+ $('connectPanel').classList.toggle('hidden',isRegister);
+ $('registerTab').classList.toggle('active',isRegister);
+ $('connectTab').classList.toggle('active',!isRegister);
+ $('registerMsg').classList.remove('show');
+ $('connectMsg').classList.remove('show');
+ if (isRegister && session?.user) refreshIncomingRequests();
+}
+
+const detectedType = /Android/i.test(navigator.userAgent) ? 'android' : 'pc';
+$('detectedDeviceText').textContent = detectedType === 'android' ? 'Android phone detected. Setup will use this device.' : 'Windows / desktop browser detected. Setup will use this device.';
+$('openThisDevice').onclick = () => openDevice(detectedType);
+$('openRequests').onclick = () => { openDevice(detectedType); switchTab('register'); setTimeout(() => $('panelIncoming').scrollIntoView({behavior:'smooth'}), 150); };
+$('openConnect').onclick = () => { openDevice(detectedType); switchTab('connect'); }; 
+$('close').onclick = closeDialog;
+$('back').onclick = closeDialog;
+overlay.onclick = e => { if(e.target === overlay) closeDialog(); };
+$('registerTab').onclick = () => switchTab('register');
+$('connectTab').onclick = () => switchTab('connect');
+
+function updateAuthUI() {
+ const loggedIn = !!session?.user;
+ // Keep the login form out of sight once the account is signed in.
+ $('authGrid').classList.toggle('hidden', loggedIn);
+ $('signup').classList.toggle('hidden', loggedIn);
+ $('signin').classList.toggle('hidden', loggedIn);
+ $('signout').classList.toggle('hidden', !loggedIn);
+ $('authTitle').textContent = loggedIn ? 'Account Connected' : 'Account Login';
+ setStatus(loggedIn
+  ? '✓ Signed in as ' + (session.user.email || 'your account') + '. Your paired devices are available below.'
+  : 'Not signed in. Enter your email and password to continue.');
+}
+
+async function initSupabase() {
+ if (!window.supabase?.createClient) {
+  setStatus('Supabase library did not load. Check internet connection.');
+  return;
+ }
+ if (SUPABASE_KEY === 'PASTE_YOUR_PUBLISHABLE_KEY_HERE') {
+  setStatus('Paste your Supabase Publishable Key into the code first.');
+  return;
+ }
+
+ sb = window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+ if (APP) { try { const ns = JSON.parse(APP.getSession() || 'null'); if (ns && ns.a) await sb.auth.setSession({access_token:ns.a, refresh_token:ns.r}); } catch (e) {} }
+ const result = await sb.auth.getSession();
+
+ if (result.error) {
+  setStatus(result.error.message);
+  return;
+ }
+
+ session = result.data.session;
+ pushSession(session);
+ updateAuthUI();
+
+ sb.auth.onAuthStateChange((_event,newSession) => {
+  session = newSession;
+  pushSession(newSession);
+  updateAuthUI();
+  if (session) {
+   subscribeIncoming(); loadSavedDevices(); startHeartbeat(); subscribeRequestStatus();
+   if (deviceRefreshTimer) clearInterval(deviceRefreshTimer);
+   deviceRefreshTimer = setInterval(loadSavedDevices,15000);
+  } else {
+   if (heartbeatTimer) clearInterval(heartbeatTimer);
+   heartbeatTimer = null;
+   if (channel) sb.removeChannel(channel);
+   channel = null;
+   if (incomingPollTimer) clearInterval(incomingPollTimer); incomingPollTimer = null;
+   if (outgoingPollTimer) clearInterval(outgoingPollTimer); outgoingPollTimer = null;
+   if (deviceRefreshTimer) clearInterval(deviceRefreshTimer); deviceRefreshTimer = null;
+   $('incoming').classList.add('hidden');
+  }
+ });
+
+ if (session) {
+  subscribeIncoming(); loadSavedDevices(); startHeartbeat(); subscribeRequestStatus();
+  if (deviceRefreshTimer) clearInterval(deviceRefreshTimer);
+  deviceRefreshTimer = setInterval(loadSavedDevices,15000);
+ }
+}
+
+$('signup').onclick = async () => {
+ if (!sb) return setStatus('Supabase is not initialized.');
+ const email = $('email').value.trim();
+ const password = $('password').value;
+
+ if (!email || password.length < 6)
+  return setStatus('Enter a valid email and password with at least 6 characters.');
+
+ const result = await sb.auth.signUp({email,password});
+
+ if (result.error) return setStatus('Signup error: '+result.error.message);
+
+ if (result.data.session) {
+  session = result.data.session;
+  updateAuthUI();
+  subscribeIncoming();
+  loadSavedDevices(); startHeartbeat(); subscribeRequestStatus();
+ } else {
+  setStatus('Account created. Check your email for verification, then sign in.');
+ }
+};
+
+$('signin').onclick = async () => {
+ if (!sb) return setStatus('Supabase is not initialized.');
+ const result = await sb.auth.signInWithPassword({
+  email:$('email').value.trim(),
+  password:$('password').value
+ });
+
+ if (result.error) return setStatus('Login error: '+result.error.message);
+
+ session = result.data.session;
+ updateAuthUI();
+ subscribeIncoming();
+ loadSavedDevices(); startHeartbeat(); subscribeRequestStatus();
+};
+
+$('signout').onclick = async () => {
+ stopHosting(true);
+ if (APP) { try { APP.stopHost(); APP.clearSession(); } catch (e) {} }
+ const result = await sb.auth.signOut();
+ if (result.error) return setStatus(result.error.message);
+ session = null;
+ if (heartbeatTimer) clearInterval(heartbeatTimer); heartbeatTimer = null;
+ updateAuthUI();
+ if (channel) await sb.removeChannel(channel);
+ channel = null;
+ if (incomingPollTimer) clearInterval(incomingPollTimer); incomingPollTimer = null;
+ if (outgoingPollTimer) clearInterval(outgoingPollTimer); outgoingPollTimer = null;
+ if (deviceRefreshTimer) clearInterval(deviceRefreshTimer); deviceRefreshTimer = null;
+ $('incoming').classList.add('hidden');
+};
+
+/* REGISTER OR LOAD THE SAME DEVICE */
+async function saveOrLoadDevice() {
+ if (!requireLogin()) return;
+ const name = $('deviceName').value.trim();
+ if (!name) return showMessage('registerMsg','Enter a device name.');
+ const storageKey = localDeviceKey(currentDevice);
+ const savedId = localStorage.getItem(storageKey);
+ if (savedId) {
+  const existing = await sb.from('devices')
+   .select('id,device_code,device_name,device_type')
+   .eq('id',savedId).eq('user_id',session.user.id).maybeSingle();
+  if (existing.data) {
+   const updated = await sb.from('devices').update({device_name:name,last_seen_at:new Date().toISOString()})
+    .eq('id',savedId).eq('user_id',session.user.id)
+    .select('id,device_code,device_name,device_type').single();
+   if (updated.error) return showMessage('registerMsg','Could not update device: '+updated.error.message);
+   showDeviceCode(updated.data);
+   showMessage('registerMsg','Existing device loaded. Your code has been kept the same.');
+   loadSavedDevices(); startHeartbeat(); subscribeIncoming();
+   return;
+  }
+  localStorage.removeItem(storageKey);
+ }
+ // Recover a previously registered device for this account/type/name if browser storage was cleared.
+ const recovered = await sb.from('devices')
+  .select('id,device_code,device_name,device_type')
+  .eq('user_id',session.user.id)
+  .eq('device_type',currentDevice)
+  .eq('device_name',name)
+  .order('created_at',{ascending:false})
+  .limit(1)
+  .maybeSingle();
+ if (!recovered.error && recovered.data) {
+  localStorage.setItem(storageKey,recovered.data.id);
+  const touched = await sb.from('devices')
+   .update({last_seen_at:new Date().toISOString()})
+   .eq('id',recovered.data.id).eq('user_id',session.user.id);
+  showDeviceCode(recovered.data);
+  showMessage('registerMsg','Your existing registered device was found. The saved code has been restored.');
+  loadSavedDevices(); startHeartbeat(); subscribeIncoming();
+  return;
+ }
+ const code = generateCode();
+ const result = await sb.from('devices').insert({
+  user_id:session.user.id, device_name:name, device_type:currentDevice,
+  device_code:code, last_seen_at:new Date().toISOString()
+ }).select('id,device_code,device_name,device_type').single();
+ if (result.error) return showMessage('registerMsg','Registration error: '+result.error.message);
+ localStorage.setItem(storageKey,result.data.id);
+ showDeviceCode(result.data);
+ showMessage('registerMsg','Device registered. This code will stay the same on this browser until you regenerate it.');
+ loadSavedDevices(); startHeartbeat(); subscribeIncoming();
+}
+
+async function regenerateDeviceCode() {
+ if (!requireLogin() || !registeredDevice) return;
+ if (!confirm('Generate a new code? The old code will stop working.')) return;
+ const newCode = generateCode();
+ const result = await sb.from('devices').update({device_code:newCode,last_seen_at:new Date().toISOString()})
+  .eq('id',registeredDevice.id).eq('user_id',session.user.id)
+  .select('id,device_code,device_name,device_type').single();
+ if (result.error) return showMessage('registerMsg','Could not regenerate code: '+result.error.message);
+ showDeviceCode(result.data);
+ showMessage('registerMsg','New device code generated. The previous code is no longer valid.');
+ loadSavedDevices();
+}
+
+$('createCode').onclick = saveOrLoadDevice;
+$('regenerateCode').onclick = regenerateDeviceCode;
+
+$('copyCode').onclick = async () => {
+ try {
+  await navigator.clipboard.writeText(currentCode);
+  showMessage('registerMsg','Device code copied.');
+ } catch(e) {
+  showMessage('registerMsg','Your device code: '+currentCode);
+ }
+};
+
+/* REQUEST CONNECTION */
+async function requestConnection(rawCode, messageTarget = 'connectMsg') {
+ if (!session?.user) {
+  showMessage(messageTarget,'Please sign in first.');
+  return;
+ }
+ const clean = normalizeCode(rawCode);
+ if (clean.length !== 8) {
+  showMessage(messageTarget,'Invalid code. Enter all 8 characters, for example ABCD-2345.');
+  return;
+ }
+ if (!sb) {
+  showMessage(messageTarget,'Database is not connected. Refresh the page and sign in again.');
+  return;
+ }
+ let requesterDeviceId = localStorage.getItem(localDeviceKey(currentDevice));
+ if (!requesterDeviceId) {
+  const own = await sb.from('devices').select('id,device_type,last_seen_at,created_at')
+   .eq('user_id',session.user.id).eq('device_type',currentDevice)
+   .order('last_seen_at',{ascending:false,nullsFirst:false}).limit(1).maybeSingle();
+  if (own.error || !own.data) {
+   showMessage(messageTarget,'First register this device (' + currentDevice.toUpperCase() + ') once, then send the connection request.');
+   return;
+  }
+  requesterDeviceId = own.data.id;
+  localStorage.setItem(localDeviceKey(currentDevice), requesterDeviceId);
+ }
+ showMessage(messageTarget,'Checking device code and sending request...');
+ const {data,error} = await sb.rpc('request_device_connection',{p_device_code:clean,p_requester_device_id:requesterDeviceId});
+ if (error) {
+  const msg = error.message || 'Unknown error';
+  if (/device code not found/i.test(msg)) {
+   showMessage(messageTarget,'Device code not found. Check that you copied the latest code from the registered device, then run the SQL fix below in Supabase.');
+  } else if (/invalid device code/i.test(msg)) {
+   showMessage(messageTarget,'Code format is incorrect. Enter the complete 8-character code.');
+  } else if (/signed in/i.test(msg)) {
+   showMessage(messageTarget,'Your session expired. Please sign in again.');
+  } else {
+   showMessage(messageTarget,'Request error: '+msg);
+  }
+  return;
+ }
+ currentOutgoingRequestId = data;
+ showMessage(messageTarget,'Request sent successfully. Waiting for the other device to approve...');
+ if (outgoingPollTimer) clearInterval(outgoingPollTimer);
+ await refreshOutgoingStatus();
+ outgoingPollTimer = setInterval(refreshOutgoingStatus,1500);
+}
+$('sendRequest').onclick = () => requestConnection($('manualCode').value);
+$('refreshPairedDevices').onclick = loadPairedDevices;
+
+$('manualCode').oninput = e => {
+ let value = normalizeCode(e.target.value);
+ e.target.value = value.length > 4
+  ? value.slice(0,4)+'-'+value.slice(4)
+  : value;
+};
+
+/* QR SCANNER */
+$('scanButton').onclick = async () => {
+ if (!session?.user) return showMessage('connectMsg','Please sign in first.');
+
+ if (!window.Html5Qrcode)
+  return showMessage('connectMsg','QR scanner library could not load.');
+
+ if (!navigator.mediaDevices?.getUserMedia)
+  return showMessage('connectMsg','Camera needs HTTPS or localhost and permission.');
+
+ $('scanner').classList.add('show');
+ $('scanButton').disabled = true;
+
+ try {
+  scanner = new Html5Qrcode('reader');
+  await scanner.start(
+   {facingMode:'environment'},
+   {fps:10,qrbox:{width:210,height:210}},
+   decoded => {
+    let value = decoded.trim();
+    if (value.toUpperCase().startsWith('MOBIPC-PAIR:'))
+     value = value.substring('MOBIPC-PAIR:'.length).trim();
+    value = formatCode(value);
+
+    $('manualCode').value = value;
+    stopScanner();
+    requestConnection(value);
+   },
+   () => {}
+  );
+ } catch(error) {
+  showMessage('connectMsg','Camera could not start. Allow camera permission and use HTTPS.');
+  stopScanner();
+ }
+};
+
+async function stopScanner() {
+ if (scanner) {
+  try {
+   if (scanner.isScanning) await scanner.stop();
+   await scanner.clear();
+  } catch(e) {}
+  scanner = null;
+ }
+ $('scanner').classList.remove('show');
+ $('scanButton').disabled = false;
+}
+$('stopScan').onclick = stopScanner;
+
+/* INCOMING REQUESTS: polling is used as a reliable fallback to Realtime */
+async function refreshIncomingRequests() {
+ if (!sb || !session?.user) return;
+ const list = $('panelIncomingList');
+ if (!list) return;
+ const {data: requests,error} = await sb.rpc('get_incoming_device_requests');
+ if (error) {
+  list.innerHTML = '<div class="request-empty">Could not load requests: ' + escapeHTML(error.message) + '<br>Check that the incoming-requests SQL function has been created in Supabase.</div>';
+  return;
+ }
+ const owned = (requests || []).filter(req => String(req.device_type || '').toLowerCase() === currentDevice);
+ const rb = $('reqBadge'); if (rb) { rb.textContent = owned.length; rb.classList.toggle('hidden', !owned.length); }
+ owned.forEach(r => { reqInfo[r.request_id] = r; });
+ if (hosting.stream && !approving) {
+  const auto = owned.find(r => r.trusted && Date.now() - new Date(r.created_at).getTime() < 120000);
+  if (auto) respondRequest(auto.request_id, 'approve', auto);
+ }
+ const fresh = owned.filter(r => !r.trusted && !announced.has(r.request_id));
+ if (fresh.length) {
+  fresh.forEach(r => announced.add(r.request_id));
+  if (!$('overlay').classList.contains('open')) { openDevice(currentDevice); switchTab('register'); }
+ }
+ if (!owned.length) {
+  list.innerHTML = '<div class="request-empty">No pending requests for this ' + (currentDevice === 'pc' ? 'PC' : 'Android device') + '.</div>';
+  return;
+ }
+ list.innerHTML = owned.map(req =>
+  '<article class="request-card">' +
+   '<b>' + escapeHTML(req.requester_device_name || 'A device') + ' wants to connect to ' + escapeHTML(req.device_name) + '</b>' +
+   '<div class="saved-meta">' + escapeHTML(req.device_type === 'pc' ? 'Windows PC' : 'Android device') + ' · ' + new Date(req.created_at).toLocaleString() + '</div>' +
+   '<div class="request-actions">' +
+    '<button data-approve="' + req.request_id + '">' + ((!hosting.stream && navigator.mediaDevices?.getDisplayMedia) ? 'Accept &amp; share screen' : 'Accept') + '</button>' +
+    '<button class="danger" data-reject="' + req.request_id + '">Reject</button>' +
+   '</div>' +
+  '</article>'
+ ).join('');
+ list.querySelectorAll('[data-approve]').forEach(btn => btn.onclick = async () => {
+  btn.disabled = true; btn.textContent = 'Accepting…';
+  await respondRequest(btn.dataset.approve,'approve');
+ });
+ list.querySelectorAll('[data-reject]').forEach(btn => btn.onclick = async () => {
+  btn.disabled = true; btn.textContent = 'Rejecting…';
+  await respondRequest(btn.dataset.reject,'reject');
+ });
+}
+
+async function subscribeIncoming() {
+ if (!sb || !session?.user) return;
+ await refreshIncomingRequests();
+ if (incomingPollTimer) clearInterval(incomingPollTimer);
+ incomingPollTimer = setInterval(refreshIncomingRequests,2500);
+}
+
+let lastOpenedApprovedRequestId = null;
+function openRemoteViewer() {
+ const viewer = $('remoteViewerOverlay');
+ viewer.classList.add('open');
+ viewer.setAttribute('aria-hidden','false');
+ $('remoteViewerStatus').textContent = 'Connected. Starting the live screen…';
+ const pd = lastPaired.find(d => String(d.peer_device_id) === String(lastTargetId));
+ $('rvName').textContent = pd ? (pd.peer_device_name || 'Remote screen') : 'Remote screen';
+ $('remoteScreenState').textContent = 'Waiting for WebRTC';
+ $('remoteViewerPlaceholder').classList.remove('hidden');
+ $('remoteViewerVideo').srcObject = null;
+ startViewer(currentOutgoingRequestId).catch(e => { $('remoteViewerStatus').textContent = 'Could not start the live view: ' + (e?.message || e); });
+}
+function showRemoteViewer() { $('remoteViewerOverlay').classList.add('open'); $('remoteViewerOverlay').setAttribute('aria-hidden','false'); }
+function hideRemoteViewer() { $('remoteViewerOverlay').classList.remove('open'); $('remoteViewerOverlay').setAttribute('aria-hidden','true'); }
+function endSession() {
+ if (rtc) stopRtc(true);
+ hideRemoteViewer();
+ $('savedMsg').textContent = 'Session ended. Press Connect to connect again.';
+}
+function closeRemoteViewer() {
+ if (rtc && rtc.role === 'viewer') stopRtc(true);
+ $('remoteViewerOverlay').classList.remove('open');
+ $('remoteViewerOverlay').setAttribute('aria-hidden','true');
+}
+$('remoteViewerClose').onclick = hideRemoteViewer;
+$('remoteViewerDone').onclick = endSession;
+
+
+async function refreshOutgoingStatus() {
+ if (!sb || !session?.user || !currentOutgoingRequestId) return;
+ const {data,error} = await sb.from('connection_requests')
+  .select('status,target_device_id')
+  .eq('id',currentOutgoingRequestId)
+  .maybeSingle();
+ if (error || !data) return;
+ const status = String(data.status || 'pending').toLowerCase();
+ lastTargetId = data.target_device_id || lastTargetId;
+ const message = status === 'approved'
+  ? '✓ Request approved. Opening the live viewer…'
+  : status === 'rejected'
+   ? 'REJECTED: The device owner rejected the connection request.'
+   : status === 'expired'
+    ? 'EXPIRED: This connection request expired. Send a new request.'
+    : 'Request sent. Waiting for the other device… (a new device must be approved once)';
+ $('savedMsg').textContent = message;
+ $('connectMsg').textContent = message;
+ $('connectMsg').classList.add('show');
+ if (status === 'approved' && lastOpenedApprovedRequestId !== currentOutgoingRequestId) {
+  lastOpenedApprovedRequestId = currentOutgoingRequestId;
+  openRemoteViewer();
+ }
+ if (status !== 'pending' && outgoingPollTimer) {
+  clearInterval(outgoingPollTimer);
+  outgoingPollTimer = null;
+ }
+}
+
+function subscribeRequestStatus() {
+ if (outgoingPollTimer) clearInterval(outgoingPollTimer);
+ if (currentOutgoingRequestId) {
+  refreshOutgoingStatus();
+  outgoingPollTimer = setInterval(refreshOutgoingStatus,1500);
+ }
+}
+let activeScreenStream = null;
+function openScreenCheck() {
+ const overlay = $('screenOverlay');
+ overlay.classList.add('open');
+ overlay.setAttribute('aria-hidden','false');
+ $('screenStatus').textContent = 'Screen sharing is off. Choose Allow & Start when ready.';
+}
+function closeScreenCheck() {
+ if (activeScreenStream) stopScreenShare();
+ $('screenOverlay').classList.remove('open');
+ $('screenOverlay').setAttribute('aria-hidden','true');
+}
+async function startScreenShare() {
+ if (!navigator.mediaDevices?.getDisplayMedia) {
+  $('screenStatus').textContent = 'Screen capture is not supported in this browser. Open this site in an up-to-date desktop browser over HTTPS.';
+  return;
+ }
+ try {
+  activeScreenStream = await navigator.mediaDevices.getDisplayMedia({video:{frameRate:15},audio:false});
+  $('screenPreview').srcObject = activeScreenStream;
+  $('screenPlaceholder').classList.add('hidden');
+  $('startScreenShare').disabled = true;
+  $('stopScreenShare').disabled = false;
+  $('screenStatus').textContent = 'Screen preview is active on this device. You can stop sharing at any time.';
+  activeScreenStream.getVideoTracks()[0].addEventListener('ended', stopScreenShare, {once:true});
+ } catch (err) {
+  activeScreenStream = null;
+  $('screenPreview').srcObject = null;
+  $('screenPlaceholder').classList.remove('hidden');
+  $('startScreenShare').disabled = false;
+  $('stopScreenShare').disabled = true;
+  $('screenStatus').textContent = err?.name === 'NotAllowedError'
+   ? 'Screen sharing was cancelled or permission was not granted. Press Allow & Start and choose a screen.'
+   : 'Could not start screen sharing: ' + (err?.message || err) + '. Use HTTPS in a supported browser.';
+ }
+}
+function stopScreenShare() {
+ if (activeScreenStream) activeScreenStream.getTracks().forEach(track => track.stop());
+ activeScreenStream = null;
+ $('screenPreview').srcObject = null;
+ $('screenPlaceholder').classList.remove('hidden');
+ $('startScreenShare').disabled = false;
+ $('stopScreenShare').disabled = true;
+ $('screenStatus').textContent = 'Screen sharing stopped.';
+}
+$('screenClose').onclick = closeScreenCheck;
+$('startScreenShare').onclick = startScreenShare;
+$('stopScreenShare').onclick = stopScreenShare;
+$('screenOverlay').addEventListener('click', e => { if (e.target === $('screenOverlay')) closeScreenCheck(); });
+
+function escapeHTML(value) {
+ return String(value).replace(/[&<>"']/g,c=>({
+  '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+ }[c]));
+}
+
+// ===== Live screen via WebRTC (signaling = Supabase Realtime broadcast) =====
+const RTC_CFG = {iceServers:[{urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302']}]};
+let rtc = null;
+let approving = false;
+const hosting = {stream:null, wantCtl:false, peerName:'', agentSource:false, starting:false};
+
+function rtcChannel(id, onMsg) {
+ return new Promise((resolve, reject) => {
+  const ch = sb.channel('rtc-' + id, {config:{broadcast:{self:false}}});
+  ['offer','answer','bye'].forEach(ev => ch.on('broadcast',{event:ev}, m => onMsg(ev, m.payload || {})));
+  const t = setTimeout(() => reject(new Error('Realtime signaling timed out')), 10000);
+  ch.subscribe(st => {
+   if (st === 'SUBSCRIBED') { clearTimeout(t); resolve(ch); }
+   else if (st === 'CHANNEL_ERROR' || st === 'TIMED_OUT') { clearTimeout(t); reject(new Error('Realtime signaling error: ' + st)); }
+  });
+ });
+}
+function rtcSend(ev, payload) { try { rtc?.ch?.send({type:'broadcast', event:ev, payload:payload || {}}); } catch (e) {} }
+function iceDone(pc) {
+ return new Promise(resolve => {
+  if (pc.iceGatheringState === 'complete') return resolve();
+  const check = () => { if (pc.iceGatheringState === 'complete') { pc.removeEventListener('icegatheringstatechange', check); resolve(); } };
+  pc.addEventListener('icegatheringstatechange', check);
+  setTimeout(resolve, 3500);
+ });
+}
+function showShareBar(text) { $('shareBarText').textContent = text; $('shareBar').classList.remove('hidden'); }
+function stopRtc(notify) {
+ if (!rtc) return;
+ const r = rtc; rtc = null;
+ clearInterval(r.timer);
+ if (notify && r.ch) { try { r.ch.send({type:'broadcast', event:'bye', payload:{}}); } catch (e) {} }
+ if (r.stream && r.ownStream) r.stream.getTracks().forEach(t => t.stop());
+ try { r.pc.close(); } catch (e) {}
+ if (r.ch) setTimeout(() => sb.removeChannel(r.ch), 400);
+ if (r.role === 'sharer') {
+  for (const k in live) if (live[k].role === 'host') delete live[k];
+  hosting.peerName = '';
+  if (!hosting.stream) setControl(false);
+  syncBar(); renderHost(); renderPaired();
+ }
+ if (r.role === 'viewer') {
+  for (const k in live) if (live[k].role === 'viewer') delete live[k];
+  viewerControl(false); renderPaired();
+ }
+}
+$('shareBarStop').onclick = () => { if (hosting.stream) manualStopHosting(); else { stopRtc(true); showMessage('registerMsg','Screen sharing stopped.'); } };
+$('shareEnd').onclick = () => { stopRtc(true); showMessage('registerMsg','Session ended. Still hosting.'); };
+$('remoteFullscreen').onclick = () => { const v = $('remoteViewerVideo'); (v.requestFullscreen || v.webkitRequestFullscreen || function(){}).call(v); };
+
+async function startSharer(id, stream, own) {
+ stopRtc(true);
+ const pc = new RTCPeerConnection(RTC_CFG);
+ const r = rtc = {role:'sharer', id, pc, stream, ownStream: own !== false};
+ stream.getTracks().forEach(t => pc.addTrack(t, stream));
+ pc.ondatachannel = e => {
+  r.dc = e.channel;
+  e.channel.onopen = () => { if (ctl.allowed) setControl(true); };
+  e.channel.onmessage = m => { if (ctl.allowed && ctl.ws && ctl.ws.readyState === 1) ctl.ws.send(m.data); };
+ };
+ const vt = stream.getVideoTracks()[0];
+ if (vt && own !== false) vt.onended = () => { if (rtc === r) { stopRtc(true); showMessage('registerMsg','Screen sharing stopped.'); } };
+ pc.onconnectionstatechange = () => {
+  if (rtc !== r) return;
+  if (pc.connectionState === 'connected') showShareBar('Your screen is being shared');
+  if (pc.connectionState === 'failed') showShareBar('Connection failed. Your network may block direct links (a TURN server is needed).');
+ };
+ r.ch = await rtcChannel(id, async (ev, p) => {
+  if (rtc !== r) return;
+  if (ev === 'offer') {
+   if (r.busy) return;
+   r.busy = true;
+   try {
+    await pc.setRemoteDescription(p.sdp);
+    await pc.setLocalDescription(await pc.createAnswer());
+    await iceDone(pc);
+    rtcSend('answer', {sdp: pc.localDescription});
+   } catch (e) { showMessage('registerMsg','Live connection error: ' + (e?.message || e)); }
+  } else if (ev === 'bye') {
+   stopRtc(false);
+   showMessage('registerMsg','The other device ended the session.');
+  }
+ });
+ showShareBar('Screen sharing is on. Waiting for the other device…');
+}
+
+async function startViewer(id) {
+ stopRtc(true);
+ const pc = new RTCPeerConnection(RTC_CFG);
+ const r = rtc = {role:'viewer', id, pc};
+ if (lastTargetId) { live[lastTargetId] = {role:'viewer'}; renderPaired(); }
+ pc.addTransceiver('video', {direction:'recvonly'});
+ r.dc = pc.createDataChannel('ctl');
+ r.dc.onmessage = m => { try { const o = JSON.parse(m.data); if (o.t === 'ctlstate') viewerControl(o.on); } catch (e) {} };
+ r.dc.onclose = () => viewerControl(false);
+ pc.ontrack = e => {
+  if (rtc !== r) return;
+  const v = $('remoteViewerVideo');
+  v.srcObject = e.streams[0] || new MediaStream([e.track]);
+  if (v.play) v.play().catch(() => {});
+  $('remoteViewerPlaceholder').classList.add('hidden');
+  $('remoteViewerStatus').textContent = 'Live: you are viewing the other device\'s screen.';
+  $('remoteScreenState').textContent = 'Live';
+ };
+ pc.onconnectionstatechange = () => {
+  if (rtc !== r) return;
+  if (pc.connectionState === 'failed') {
+   $('remoteViewerStatus').textContent = 'Connection failed. Your network may block direct links (a TURN server is needed).';
+   $('remoteScreenState').textContent = 'Failed';
+  }
+ };
+ $('remoteScreenState').textContent = 'Connecting…';
+ r.ch = await rtcChannel(id, async (ev, p) => {
+  if (rtc !== r) return;
+  if (ev === 'answer' && !pc.remoteDescription) {
+   clearInterval(r.timer);
+   try { await pc.setRemoteDescription(p.sdp); }
+   catch (e) { $('remoteViewerStatus').textContent = 'Live connection error: ' + (e?.message || e); }
+  } else if (ev === 'bye') {
+   stopRtc(false);
+   $('remoteViewerVideo').srcObject = null;
+   $('remoteViewerPlaceholder').classList.remove('hidden');
+   $('remoteViewerStatus').textContent = 'The device owner stopped sharing.';
+   $('remoteScreenState').textContent = 'Stopped';
+  }
+ });
+ await pc.setLocalDescription(await pc.createOffer());
+ await iceDone(pc);
+ if (rtc !== r) return;
+ let tries = 0;
+ const send = () => {
+  if (pc.remoteDescription) return;
+  rtcSend('offer', {sdp: pc.localDescription});
+  if (++tries === 7) $('remoteViewerStatus').textContent = 'No screen received yet. The owner may not have allowed sharing, or that device\'s browser cannot share its screen (phones need the Android app).';
+ };
+ send();
+ r.timer = setInterval(send, 3000);
+}
+
+// ===== Remote control (viewer -> data channel -> owner page -> local MobiPC Agent) =====
+const ctl = {ws:null, allowed:false, onframe:null};
+const vctl = {on:false, drag:false, pad:false, cur:{x:0.5, y:0.5}};
+function agentConnect(token) {
+ return new Promise((resolve, reject) => {
+  let ws; try { ws = new WebSocket('ws://127.0.0.1:8765'); } catch (e) { return reject(e); }
+  ws.binaryType = 'arraybuffer';
+  const t = setTimeout(() => { try { ws.close(); } catch (e) {} reject(new Error('timeout')); }, 5000);
+  ws.onopen = () => ws.send(JSON.stringify({token}));
+  ws.onmessage = e => {
+   if (typeof e.data === 'string') { if (e.data === 'ok') { clearTimeout(t); ctl.ws = ws; resolve(); } }
+   else if (ctl.onframe) ctl.onframe(e.data);
+  };
+  ws.onclose = () => {
+   clearTimeout(t);
+   if (ctl.ws === ws) { ctl.ws = null; if (hosting.agentSource) stopHosting(true); else if (ctl.allowed) setControl(false); }
+   reject(new Error('closed'));
+  };
+ });
+}
+function setControl(on) {
+ ctl.allowed = on;
+ $('shareCtl').textContent = on ? 'Control ON · tap to stop' : 'Allow control';
+ const dc = rtc && rtc.dc;
+ if (dc && dc.readyState === 'open') dc.send(JSON.stringify({t:'ctlstate', on}));
+}
+$('shareCtl').onclick = async () => {
+ const stm = hosting.stream || (rtc && rtc.stream);
+ if (!stm) return;
+ if (ctl.allowed) { setControl(false); hosting.wantCtl = false; syncBar(); return; }
+ const st = stm.getVideoTracks()[0]?.getSettings?.() || {};
+ if (st.displaySurface && st.displaySurface !== 'monitor') { showShareBar('Control needs "Entire screen". Stop sharing and share again, choosing Entire screen.'); return; }
+ if (await tryAgent(true)) { hosting.wantCtl = true; setControl(true); syncBar(); return; }
+ showShareBar('Could not reach the MobiPC Agent. Start it on this PC and check the token.');
+};
+async function tryAgent(prompting) {
+ if (ctl.ws && ctl.ws.readyState === 1) return true;
+ let token = localStorage.getItem('mobipc_agent_token');
+ if (!token && prompting) token = (prompt('Enter the token shown in the MobiPC Agent window on this PC.\nLeave it empty to use the browser screen picker instead:') || '').trim();
+ if (!token) return false;
+ try { await agentConnect(token); localStorage.setItem('mobipc_agent_token', token); return true; }
+ catch (e) { return false; }
+}
+function syncBar() {
+ const sharing = !!(rtc && rtc.role === 'sharer');
+ const show = !!hosting.stream || sharing;
+ $('shareBar').classList.toggle('hidden', !show);
+ $('shareEnd').classList.toggle('hidden', !sharing);
+ $('shareBarStop').textContent = hosting.stream ? 'Stop hosting' : 'Stop sharing';
+ if (show) $('shareBarText').textContent = sharing
+  ? 'Connected: ' + (hosting.peerName || 'other device') + (ctl.allowed ? ' · control ON' : ' · view only')
+  : 'Hosting your screen · ready for trusted devices';
+}
+function renderHost() {
+ const can = !!APP || !!navigator.mediaDevices?.getDisplayMedia;
+ const on = APP ? !!nat.hosting : !!hosting.stream;
+ const sharing = APP ? !!nat.peerId : !!(rtc && rtc.role === 'sharer');
+ const who = (APP ? nat.peerName : hosting.peerName) || 'A device';
+ $('hostStart').classList.toggle('hidden', on || !can);
+ $('hostStop').classList.toggle('hidden', !on);
+ $('hostCtl').closest('label').classList.toggle('hidden', on || !can);
+ $('hostCtlText').textContent = APP ? 'Allow remote control (needs Accessibility permission)' : 'Allow remote control (needs the MobiPC Agent)';
+ $('hostA11y').classList.toggle('hidden', !(APP && !nat.a11y && (on || $('hostCtl').checked)));
+ $('hostDot').className = 'host-dot' + (on ? (sharing ? ' live' : ' ready') : '');
+ $('hostTitle').textContent = !can ? 'This browser cannot share its screen' : on ? (sharing ? 'Connected' : 'Ready for connections') : 'Not hosting';
+ $('hostSub').textContent = !can ? 'Android browsers cannot share the screen. Use the MobiPC Android app.'
+  : on ? (sharing ? who + ' is viewing your screen.' + (APP ? (nat.control && nat.a11y ? ' Control is on.' : ' View only.') : '') : 'Trusted devices connect instantly. A new device needs your OK once.')
+  : APP ? 'Start once. Android asks for screen permission one time, then trusted devices connect instantly.'
+  : 'Start once. With the MobiPC Agent running, no screen picker or popup is needed again, and hosting restarts by itself.';
+}
+function agentScreen() {
+ return new Promise((resolve, reject) => {
+  const canvas = document.createElement('canvas');
+  canvas.width = 1280; canvas.height = 720;
+  canvas.style.cssText = 'position:fixed;left:-9999px;top:0;width:2px;height:2px';
+  document.body.appendChild(canvas);
+  const g = canvas.getContext('2d');
+  const stream = canvas.captureStream(15);
+  let got = false;
+  const timer = setTimeout(() => {
+   if (got) return;
+   ctl.onframe = null; canvas.remove();
+   try { ctl.ws.send(JSON.stringify({t:'screen', on:false})); } catch (e) {}
+   reject(new Error('no frames received'));
+  }, 6000);
+  ctl.onframe = async buf => {
+   try {
+    const bmp = await createImageBitmap(new Blob([buf], {type:'image/jpeg'}));
+    if (canvas.width !== bmp.width || canvas.height !== bmp.height) { canvas.width = bmp.width; canvas.height = bmp.height; }
+    g.drawImage(bmp, 0, 0); bmp.close();
+    if (!got) { got = true; clearTimeout(timer); stream._canvas = canvas; resolve(stream); }
+   } catch (e) {}
+  };
+  ctl.ws.send(JSON.stringify({t:'screen', on:true, fps:15, w:1280, q:60}));
+ });
+}
+async function startHosting(silent) {
+ if (APP) {
+  const id = localStorage.getItem(localDeviceKey('android'));
+  if (!id) { $('hostSub').textContent = 'Register this phone first: tap Set up this device.'; return; }
+  localStorage.setItem('mobipc_host_ctl', $('hostCtl').checked ? '1' : '0');
+  APP.startHost(String(id), $('hostCtl').checked);
+  return;
+ }
+ if (hosting.stream || hosting.starting) return;
+ if (!session?.user) { if (!silent) $('hostSub').textContent = 'Please sign in first.'; return; }
+ hosting.starting = true;
+ try {
+  let stream = null, viaAgent = false;
+  if (await tryAgent(!silent)) {
+   try { stream = await agentScreen(); viaAgent = true; }
+   catch (e) { if (!silent) $('hostSub').textContent = 'The agent did not send the screen (' + e.message + ').'; }
+  }
+  if (!stream && !silent && navigator.mediaDevices?.getDisplayMedia) {
+   try { stream = await navigator.mediaDevices.getDisplayMedia({video:{frameRate:{ideal:30}}, audio:false}); }
+   catch (e) { $('hostSub').textContent = 'Screen sharing was not allowed. Press Start hosting when you are ready.'; return; }
+  }
+  if (!stream) return;
+  hosting.stream = stream; hosting.agentSource = viaAgent;
+  hosting.wantCtl = $('hostCtl').checked;
+  localStorage.setItem('mobipc_host_ctl', hosting.wantCtl ? '1' : '0');
+  if (!silent) localStorage.setItem('mobipc_autohost', '1');
+  stream.getVideoTracks()[0].onended = () => stopHosting(true);
+  syncBar(); renderHost();
+  if (hosting.wantCtl && viaAgent) setControl(true);
+  else if (hosting.wantCtl) $('hostSub').textContent = 'Hosting is view-only. Start the MobiPC Agent to allow control.';
+  refreshIncomingRequests();
+ } finally { hosting.starting = false; }
+}
+function stopHosting(notify) {
+ if (rtc && rtc.role === 'sharer') stopRtc(notify);
+ if (hosting.stream) { hosting.stream.getTracks().forEach(t => t.stop()); if (hosting.stream._canvas) hosting.stream._canvas.remove(); hosting.stream = null; }
+ if (hosting.agentSource) { ctl.onframe = null; try { if (ctl.ws) ctl.ws.send(JSON.stringify({t:'screen', on:false})); } catch (e) {} }
+ hosting.agentSource = false;
+ setControl(false); syncBar(); renderHost();
+}
+function manualStopHosting() {
+ if (APP) { APP.stopHost(); return; }
+ localStorage.setItem('mobipc_autohost', '0');
+ stopHosting(true);
+ try { if (ctl.ws) ctl.ws.close(); } catch (e) {}
+}
+window.mobiNative = {
+ state(j) {
+  Object.assign(nat, typeof j === 'string' ? JSON.parse(j) : j);
+  for (const k in live) if (live[k].role === 'host') delete live[k];
+  if (nat.peerId) live[nat.peerId] = {role:'host'};
+  hosting.peerName = nat.peerName || '';
+  renderHost(); renderPaired();
+  if (nat.note) $('hostSub').textContent = nat.note;
+ },
+ async resume() {
+  try { const ns = JSON.parse(APP.getSession() || 'null'); if (ns && ns.a && sb) await sb.auth.setSession({access_token:ns.a, refresh_token:ns.r}); } catch (e) {}
+ }
+};
+if (APP) {
+ $('remoteFullscreen').classList.add('hidden');
+ $('hostA11yBtn').onclick = () => APP.openAccessibility();
+ $('hostCtl').onchange = () => { try { APP.setControl($('hostCtl').checked); } catch (e) {} };
+ try { window.mobiNative.state(APP.state()); } catch (e) {}
+}
+$('hostStart').onclick = () => startHosting(false);
+$('hostStop').onclick = manualStopHosting;
+// after the first manual start, hosting restarts by itself whenever the agent is running
+setInterval(() => {
+ if (hosting.stream || hosting.starting || approving || !session?.user) return;
+ if (/Android/i.test(navigator.userAgent) || localStorage.getItem('mobipc_autohost') !== '1') return;
+ if (!localStorage.getItem('mobipc_agent_token') || !localStorage.getItem(localDeviceKey('pc'))) return;
+ startHosting(true);
+}, 6000);
+$('hostCtl').checked = localStorage.getItem('mobipc_host_ctl') !== '0';
+renderHost();
+
+function viewerControl(on) {
+ vctl.on = on; vctl.drag = false; vctl.rightOnce = false; vctl.pad = false; vctl.cur = {x:0.5, y:0.5};
+ $('vcDrag').textContent = 'Drag mode: off';
+ $('vcRight').textContent = 'Right-click: off';
+ $('vcMode').textContent = 'Mode: Direct';
+ $('vcTools').classList.toggle('hidden', !on);
+ $('vcState').textContent = on ? 'On' : 'Off';
+ if (on) $('remoteViewerStatus').textContent = 'Tap = click · hold = right click · two fingers = scroll · two-finger tap = right click';
+}
+function ctlSend(o) {
+ const dc = rtc && rtc.role === 'viewer' && rtc.dc;
+ if (vctl.on && dc && dc.readyState === 'open') dc.send(JSON.stringify(o));
+}
+function vpt(cx, cy) {
+ const v = $('remoteViewerVideo'), r = v.getBoundingClientRect();
+ if (!v.videoWidth) return null;
+ const s = Math.min(r.width / v.videoWidth, r.height / v.videoHeight), w = v.videoWidth * s, h = v.videoHeight * s;
+ const x = (cx - (r.left + (r.width - w) / 2)) / w, y = (cy - (r.top + (r.height - h) / 2)) / h;
+ return (x < 0 || x > 1 || y < 0 || y > 1) ? null : {x, y};
+}
+(function bindControlInput() {
+ const vid = $('remoteViewerVideo');
+ let lastMove = 0, tch = null;
+ const dot = $('vcDot');
+ const showDot = (x, y) => { dot.style.left = x + 'px'; dot.style.top = y + 'px'; dot.style.opacity = 1; };
+ $('vcRight').onclick = () => { vctl.rightOnce = !vctl.rightOnce; $('vcRight').textContent = 'Right-click: ' + (vctl.rightOnce ? 'on' : 'off'); };
+ const throttled = () => { const n = Date.now(); if (n - lastMove < 30) return false; lastMove = n; return true; };
+ // mouse + keyboard (desktop viewer)
+ vid.addEventListener('mousemove', e => { if (!vctl.on || !throttled()) return; const p = vpt(e.clientX, e.clientY); if (p) ctlSend({t:'move', ...p}); });
+ vid.addEventListener('mousedown', e => { if (!vctl.on) return; e.preventDefault(); vid.focus(); const p = vpt(e.clientX, e.clientY); if (p) ctlSend({t:'down', b:e.button, ...p}); });
+ vid.addEventListener('mouseup', e => { if (!vctl.on) return; const p = vpt(e.clientX, e.clientY); ctlSend({t:'up', b:e.button, ...(p || {})}); });
+ vid.addEventListener('contextmenu', e => e.preventDefault());
+ vid.addEventListener('wheel', e => { if (!vctl.on) return; e.preventDefault(); ctlSend({t:'wheel', dy:e.deltaY}); }, {passive:false});
+ vid.addEventListener('keydown', e => {
+  if (!vctl.on || ['Control','Shift','Alt','Meta'].includes(e.key)) return;
+  e.preventDefault();
+  ctlSend({t:'key', k:e.key, c:e.ctrlKey, a:e.altKey, s:e.shiftKey, m:e.metaKey});
+ });
+ // touch: Direct mode (finger = pointer) or Touchpad mode (finger moves the pointer slowly)
+ const vsize = () => { const r = vid.getBoundingClientRect(); const k = vid.videoWidth ? Math.min(r.width / vid.videoWidth, r.height / vid.videoHeight) : 1; return {w:(vid.videoWidth || r.width) * k, h:(vid.videoHeight || r.height) * k}; };
+ vid.addEventListener('touchstart', e => {
+  if (!vctl.on) return;
+  e.preventDefault();
+  const t = e.touches;
+  if (t.length >= 2) { if (tch) clearTimeout(tch.lp); tch = {scroll:true, moved:false, t0:Date.now(), y:(t[0].clientY + t[1].clientY) / 2}; return; }
+  const x = t[0].clientX, y = t[0].clientY;
+  let p;
+  if (vctl.pad) p = vctl.cur;
+  else { p = vpt(x, y); if (!p) { tch = null; return; } vctl.cur = p; }
+  tch = {x0:x, y0:y, px:x, py:y, moved:false, long:false, t0:Date.now(), last:p};
+  showDot(x, y);
+  if (!vctl.pad) ctlSend({t:'move', ...p});
+  if (vctl.drag) ctlSend({t:'down', b:0, ...vctl.cur});
+  else tch.lp = setTimeout(() => { if (tch && !tch.moved && !tch.scroll) { tch.long = true; ctlSend({t:'click', b:2, ...vctl.cur}); } }, 500);
+ }, {passive:false});
+ vid.addEventListener('touchmove', e => {
+  if (!vctl.on || !tch) return;
+  e.preventDefault();
+  const t = e.touches;
+  if (tch.scroll) {
+   if (t.length >= 2) { const mid = (t[0].clientY + t[1].clientY) / 2, d = mid - tch.y; if (Math.abs(d) > 6) { tch.moved = true; ctlSend({t:'wheel', dy:-d * 2}); tch.y = mid; } }
+   return;
+  }
+  const x = t[0].clientX, y = t[0].clientY;
+  if (Math.hypot(x - tch.x0, y - tch.y0) > 10) { tch.moved = true; clearTimeout(tch.lp); }
+  showDot(x, y);
+  if (vctl.pad) {
+   const sz = vsize(), gain = 1.6;
+   vctl.cur = {x:Math.min(1, Math.max(0, vctl.cur.x + (x - tch.px) * gain / sz.w)), y:Math.min(1, Math.max(0, vctl.cur.y + (y - tch.py) * gain / sz.h))};
+   tch.px = x; tch.py = y; tch.last = vctl.cur;
+   if (tch.moved && throttled()) ctlSend({t:'move', ...vctl.cur});
+  } else {
+   const p = vpt(x, y);
+   if (p) { tch.last = p; vctl.cur = p; if (tch.moved && throttled()) ctlSend({t:'move', ...p}); }
+  }
+ }, {passive:false});
+ vid.addEventListener('touchend', e => {
+  if (!vctl.on) return;
+  e.preventDefault();
+  if (e.touches.length > 0 || !tch) return;
+  clearTimeout(tch.lp);
+  setTimeout(() => { dot.style.opacity = 0; }, 250);
+  if (tch.scroll) { if (!tch.moved && Date.now() - tch.t0 < 350) ctlSend({t:'click', b:2, ...vctl.cur}); }
+  else if (vctl.drag) ctlSend({t:'up', b:0, ...vctl.cur});
+  else if (!tch.moved && !tch.long && Date.now() - tch.t0 < 500) {
+   ctlSend({t:'click', b:vctl.rightOnce ? 2 : 0, ...vctl.cur});
+   if (vctl.rightOnce) { vctl.rightOnce = false; $('vcRight').textContent = 'Right-click: off'; }
+  }
+  tch = null;
+ }, {passive:false});
+ $('vcMode').onclick = () => { vctl.pad = !vctl.pad; $('vcMode').textContent = 'Mode: ' + (vctl.pad ? 'Touchpad' : 'Direct'); };
+ $('vcTab').onclick = () => ctlSend({t:'key', k:'Tab'});
+ $('vcAlt').onclick = () => ctlSend({t:'key', k:'Tab', a:true});
+ // phone keyboard + shortcut buttons
+ const kbIn = $('vcKb');
+ $('vcKeyboard').onclick = () => { kbIn.value = ' '; kbIn.focus(); };
+ kbIn.addEventListener('input', () => {
+  if (!vctl.on) return;
+  const v = kbIn.value;
+  if (v.length < 1) ctlSend({t:'key', k:'Backspace'});
+  else if (v.length > 1) ctlSend({t:'text', s:v.slice(1)});
+  kbIn.value = ' ';
+ });
+ kbIn.addEventListener('keydown', e => { if (vctl.on && e.key === 'Enter') { e.preventDefault(); ctlSend({t:'key', k:'Enter'}); } });
+ $('vcDrag').onclick = () => { vctl.drag = !vctl.drag; $('vcDrag').textContent = 'Drag mode: ' + (vctl.drag ? 'on' : 'off'); };
+ $('vcEsc').onclick = () => ctlSend({t:'key', k:'Escape'});
+ $('vcWin').onclick = () => ctlSend({t:'key', k:'Meta'});
+})();
+
+async function respondRequest(id, decision, info) {
+ if (approving) return;
+ approving = true;
+ try {
+  info = info || reqInfo[id] || {};
+  let started = false;
+  if (decision === 'approve') {
+   let stream = hosting.stream, own = false;
+   if (!stream && navigator.mediaDevices?.getDisplayMedia) {
+    try { stream = await navigator.mediaDevices.getDisplayMedia({video:{frameRate:{ideal:30}}, audio:false}); own = true; }
+    catch (e) { showMessage('registerMsg','Screen sharing was not allowed, so the request is still pending. Press Accept again when you are ready.'); return; }
+   }
+   if (stream) {
+    if (hosting.stream && hosting.wantCtl && !ctl.allowed && await tryAgent(false)) setControl(true);
+    try { await startSharer(id, stream, own); started = true; hosting.peerName = info.requester_device_name || 'Another device'; }
+    catch (e) { if (own) stream.getTracks().forEach(t => t.stop()); showMessage('registerMsg','Could not start the live connection: ' + (e?.message || e)); return; }
+   }
+  }
+  const result = await sb.rpc('respond_device_connection',{p_request_id:id, p_decision:decision});
+  if (result.error) {
+   stopRtc(false);
+   showMessage('registerMsg','Could not update request: ' + result.error.message);
+   return;
+  }
+  if (APP && nat.hosting && decision === 'approve') { try { APP.serve(id, String(info.requester_device_id || ''), info.requester_device_name || ''); } catch (e) {} }
+  if (started && info.requester_device_id) live[String(info.requester_device_id)] = {role:'host'};
+  syncBar(); renderHost(); renderPaired();
+  showMessage('registerMsg', decision === 'approve'
+   ? ((started || (APP && nat.hosting)) ? 'Connected. Your screen is being shared.' : APP ? 'Accepted. Tap Start hosting to share the screen of this phone.' : 'Accepted. This browser cannot share a screen, so only pairing is active.')
+   : 'Connection request rejected.');
+  await refreshOutgoingStatus();
+  loadSavedDevices();
+ } finally {
+  approving = false;
+  refreshIncomingRequests();
+ }
+}
+
+initSupabase().catch(error => setStatus('Startup error: ' + (error?.message || error)));
+})();
+</script>
+</body>
+</html>
